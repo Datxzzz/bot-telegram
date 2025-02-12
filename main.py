@@ -46,7 +46,7 @@ def menu_command(message):
         "🔠 /sunda [teks] → Konversi Latin ↔ Aksara Sunda\n"
         "🎵 /tt [link TikTok] → Download Video TikTok\n"
         "╔══════════════════╗\n"
-        "          *By DatxzzXploit* \n"
+        "     *By DatxzzXploit* \n"
         "╚══════════════════╝"
     )
     bot.reply_to(message, menu_text, parse_mode="Markdown")

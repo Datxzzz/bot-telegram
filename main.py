@@ -40,35 +40,60 @@ def menu_command(message):
         "╔══════════════════╗\n"
         "      ✨ *MENU BOT* ✨\n"
         "╚══════════════════╝\n"
-        "📌 /ai [pertanyaan] → AI Blackbox\n"
+        "🤖 /gpt [pertanyaan] → ChatGPT API\n"
+        "📸 /ig [link IG] → Download Instagram\n"
         "🌐 /ssweb [url] → Screenshot Web\n"
         "🕰 /runtime → Info Runtime Bot\n"
         "🔠 /sunda [teks] → Konversi Latin ↔ Aksara Sunda\n"
-        "🎵 /tt [link TikTok] → Download Video TikTok\n"
         "╔══════════════════╗\n"
         "     *By DatxzzXploit* \n"
         "╚══════════════════╝"
     )
     bot.reply_to(message, menu_text, parse_mode="Markdown")
 
-@bot.message_handler(commands=["ai"])
-def blackbox_ai(message):
-    text = message.text.replace("/ai", "").strip()
+@bot.message_handler(commands=["gpt"])
+def handle_gpt(message):
+    text = message.text.replace("/gpt", "").strip()
 
     if not text:
-        bot.reply_to(message, "⚠️ *Contoh:* `/ai Apa itu AI Blackbox?`", parse_mode="Markdown")
+        bot.reply_to(message, "🤖 *Halo! Ada yang bisa saya bantu?*\n\n*Contoh:* `/gpt Apa itu AI?`", parse_mode="Markdown")
         return
 
     bot.reply_to(message, "⏳ *Memproses...*", parse_mode="Markdown")
 
     try:
-        url = f"https://api.siputzx.my.id/api/ai/blackboxai?content={quote(text)}"
+        url = f"https://api-rest-rizzkyofc.vercel.app/api/ai/gpt-3-5-turbo?text={quote(text)}"
         response = requests.get(url).json()
-        ai_response = response.get('data', 'Maaf, AI tidak bisa menjawab saat ini.')
+        ai_response = response.get('result', 'Maaf, saya tidak dapat menjawab saat ini.')
     except Exception:
-        ai_response = "⚠️ *Error:* Tidak dapat menghubungi server AI."
+        ai_response = "⚠️ *Error:* Tidak dapat menghubungi server ChatGPT."
 
     bot.reply_to(message, ai_response)
+
+@bot.message_handler(commands=["ig"])
+def download_instagram(message):
+    text = message.text.replace("/ig", "").strip()
+
+    if not text or not text.startswith("https://"):
+        bot.reply_to(message, "⚠️ *Contoh:* `/ig https://www.instagram.com/reel/xyz/`", parse_mode="Markdown")
+        return
+
+    bot.reply_to(message, "⏳ *Mengunduh...*", parse_mode="Markdown")
+
+    try:
+        url = f"https://api-rest-rizzkyofc.vercel.app/api/download/igdl?url={quote(text)}"
+        response = requests.get(url).json()
+
+        if 'result' in response:
+            for media in response['result']:
+                if media.endswith(".mp4"):
+                    bot.send_video(message.chat.id, media, caption="🎥 *Video Instagram*")
+                elif media.endswith(".jpg") or media.endswith(".png"):
+                    bot.send_photo(message.chat.id, media, caption="📸 *Foto Instagram*")
+        else:
+            bot.reply_to(message, "⚠️ *Error:* Tidak dapat mengunduh media Instagram.")
+    except Exception:
+        bot.reply_to(message, "⚠️ *Error:* Terjadi kesalahan saat menghubungi server.")
 
 @bot.message_handler(commands=["ssweb"])
 def screenshot_website(message):
@@ -120,35 +145,6 @@ def sunda_converter(message):
         converted_text = convert_from_sundanese(text)
 
     bot.reply_to(message, f"🔠 *Hasil Konversi:*\n`{converted_text}`", parse_mode="Markdown")
-
-@bot.message_handler(commands=["tt"])
-def download_tiktok(message):
-    text = message.text.replace("/tt", "").strip()
-
-    if not text or not text.startswith("https://"):
-        bot.reply_to(message, "⚠️ *Contoh:* `/tt https://vt.tiktok.com/ZS6qRB5Dm/`", parse_mode="Markdown")
-        return
-
-    bot.reply_to(message, "⏳ *Mengunduh...*", parse_mode="Markdown")
-
-    try:
-        response = requests.get(f"https://api.diioffc.web.id/api/download/tiktok?url={text}").json()
-
-        if 'images' in response['result']:
-            for i in response['result']['images']:
-                bot.send_photo(message.chat.id, i)
-        else:
-            bot.send_video(
-                message.chat.id, response['result']['play'], 
-                caption=f"🎵 {response['result']['title']}", parse_mode="Markdown"
-            )
-            time.sleep(3)
-            bot.send_audio(
-                message.chat.id, response['result']['music_info']['play'], 
-                title=response['result']['music_info']['title']
-            )
-    except Exception:
-        bot.reply_to(message, "⚠️ *Error:* Gagal mengunduh video TikTok.")
 
 if __name__ == "__main__":
     print("Bot sedang berjalan...")
